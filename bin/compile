@@ -13,10 +13,17 @@ heroku_rev='-2'
 
 # config
 MCRYPT_VERSION="2.5.8"
+LIBICU_VERSION="50.1.2"
 APACHE_VERSION="2.2.25"
 APACHE_PATH="apache"
 PHP_VERSION="5.3.27"
 PHP_PATH="php"
+S3_BUCKET="existencebkct"
+
+S3_URL="https://s3.amazonaws.com/${S3_BUCKET}"
+
+ICU_FILE="libicu-${LIBICU_VERSION}.tar.gz"
+ICU_URL="${S3_URL}/${ICU_FILE}"
 
 BIN_DIR=$(dirname $0)
 BUILD_DIR=$1
@@ -38,6 +45,19 @@ if [ -f www/Procfile ]; then
   mv www/Procfile .
 fi
 
+function indent() {
+	c='s/^/       /'
+	case $(uname) in
+		Darwin) sed -l "$c";;
+		*)      sed -u "$c";;
+	esac
+}
+
+function download_url() {
+	TARGET_URL="$1"
+	curl -s -S -O -L -m 300 --connect-timeout 60 "$TARGET_URL"
+}
+
 MCRYPT_URL="https://heroku-buildpack-php.s3.amazonaws.com/mcrypt-""$MCRYPT_VERSION""$heroku_rev"".tar.gz"
 echo "-----> Bundling mcrypt version $MCRYPT_VERSION"
 curl --silent --max-time 60 --location "$MCRYPT_URL" | tar xz
@@ -49,6 +69,17 @@ curl --silent --max-time 60 --location "$APACHE_URL" | tar xz
 PHP_URL="https://heroku-buildpack-php.s3.amazonaws.com/php-$PHP_VERSION""$heroku_rev"".tar.gz"
 echo "-----> Bundling PHP version $PHP_VERSION"
 curl --silent --max-time 60 --location "$PHP_URL" | tar xz
+
+echo "-----> Installing libicu"
+if [ -f "${ICU_FILE}" ]
+then
+    echo "Using cached libicu v${LIBICU_VERSION}"
+else
+    echo "Bundling libicu v${LIBICU_VERSION}" | indent
+    echo ${ICU_URL} | indent
+    download_url ${URL_URL}
+fi
+    
 
 # update config files
 cp $LP_DIR/conf/httpd.conf $APACHE_PATH/conf
