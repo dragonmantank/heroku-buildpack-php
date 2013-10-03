@@ -16,7 +16,7 @@ MCRYPT_VERSION="2.5.8"
 LIBICU_VERSION="50.1.2"
 APACHE_VERSION="2.2.25"
 APACHE_PATH="apache"
-PHP_VERSION="5.3.27"
+PHP_VERSION="5.4.12"
 PHP_PATH="php"
 S3_BUCKET="existencebkct"
 
@@ -70,6 +70,10 @@ PHP_URL="https://heroku-buildpack-php.s3.amazonaws.com/php-$PHP_VERSION""$heroku
 echo "-----> Bundling PHP version $PHP_VERSION"
 curl --silent --max-time 60 --location "$PHP_URL" | tar xz
 
+# update config files
+cp $LP_DIR/conf/httpd.conf $APACHE_PATH/conf
+cp $LP_DIR/conf/php.ini php
+
 echo "-----> Installing libicu"
 if [ -f "${ICU_FILE}" ]
 then
@@ -79,11 +83,13 @@ else
     echo ${ICU_URL} | indent
     download_url ${ICU_URL}
 fi
-    
 
-# update config files
-cp $LP_DIR/conf/httpd.conf $APACHE_PATH/conf
-cp $LP_DIR/conf/php.ini php
+tar xzf ${ICU_FILE} -C ${BUILD_DIR}/local
+
+echo '-----> Installing php-intl'
+mkdir -p ${BUILD_DIR}/php-extensions
+curl --silent --max-time 60 --location -o ${BUILD_DIR}/php-extensions/intl.so "http://www.ctankersley.com/intl.so"
+echo "extension=/app/php-extensions/intl.so" >> /app/php/php.ini
 
 # make php available on bin
 mkdir -p bin
