@@ -77,7 +77,7 @@ then
 else
     echo "Bundling libicu v${LIBICU_VERSION}" | indent
     echo ${ICU_URL} | indent
-    download_url ${URL_URL}
+    download_url ${ICU_URL}
 fi
     
 
