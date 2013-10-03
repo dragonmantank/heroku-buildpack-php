@@ -84,13 +84,13 @@ else
     download_url ${ICU_URL}
 fi
 
-mkdir -p /app/local
-tar xzf ${ICU_FILE} -C /app/local
+mkdir -p local
+tar xzf ${ICU_FILE} -C local
 
 echo '-----> Installing php-intl'
-mkdir -p /app/php-extensions
-curl --silent --max-time 60 --location -o /app/php-extensions/intl.so "http://www.ctankersley.com/intl.so"
-echo "extension=/app/php-extensions/intl.so" >> /app/php/php.ini
+mkdir -p php-extensions
+curl --silent --max-time 60 --location -o php-extensions/intl.so "http://www.ctankersley.com/intl.so"
+echo "extension=/app/php-extensions/intl.so" >> php/php.ini
 
 # make php available on bin
 mkdir -p bin
